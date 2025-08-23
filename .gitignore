@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.streamlit/
+.streamlit_cache/
+.streamlit_logs/
+# macOS system files
+.DS_Store
+
+# VSCode settings
+.vscode/
