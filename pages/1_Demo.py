@@ -83,7 +83,7 @@ if "webcam_running" not in st.session_state:
     st.session_state.webcam_running = False
 
 # Input type selection
-img_tab, video_tab, cam_tab, web_rtc, savedVideo = st.tabs(["Image", "Video", "Webcam", "WebRtc", "Saved Video"])
+img_tab, video_tab, cam_tab, web_rtc = st.tabs(["Image", "Video", "Webcam", "WebRtc"])
 
 # -------------------- IMAGE --------------------
 with img_tab:
@@ -204,23 +204,6 @@ with web_rtc:
         media_stream_constraints={"video": True, "audio": False},
     )
 
-with savedVideo:
-    uploaded_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv"], key = "video upload")
-    if uploaded_file:
-        # Save uploaded video temporarily
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-        temp_file.write(uploaded_file.read())
-        temp_file_path = temp_file.name
-
-        temp_output_path = os.path.join(tempfile.gettempdir(), "output.mp4")
-
-        results = model(temp_file_path, conf=confidence, save=True, project=tempfile.gettempdir(), name="detect")
-
-         # YOLO saves output inside save_dir/detect/
-        output_path = os.path.join(tempfile.gettempdir(), "detect", os.path.basename(temp_file_path))
-
-        # Display the annotated video
-        st.video(output_path)
 
 # --- Main thread: handle audio playback ---
 if st.session_state.detected_class:
