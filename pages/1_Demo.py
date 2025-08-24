@@ -111,7 +111,21 @@ with video_tab:
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
 
-        st.video(temp_file_path)
+        cap = cv2.VideoCapture(temp_file_path)
+
+        st_frame = st.empty()
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            results = model(frame, conf=confidence)
+
+            annotated_frame = results[0].plot()
+
+            st_frame.image(cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB), channels = "RGB")
+
+        cap.release()
+
         results = model(temp_file_path, conf=confidence)[0]
         st.write(results)
 
