@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 import base64
 import time
+import tempfile
+import os
 
 # Load YOLO model
 model = YOLO("model/traffic_sign_model.pt")
@@ -81,7 +83,7 @@ if "webcam_running" not in st.session_state:
     st.session_state.webcam_running = False
 
 # Input type selection
-img_tab, video_tab, cam_tab, web_rtc = st.tabs(["Image", "Video", "Webcam", "WebRtc"])
+img_tab, video_tab, cam_tab, web_rtc, savedVideo = st.tabs(["Image", "Video", "Webcam", "WebRtc", "Saved Video"])
 
 # -------------------- IMAGE --------------------
 with img_tab:
@@ -125,9 +127,6 @@ with video_tab:
             st_frame.image(cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB), channels = "RGB")
 
         cap.release()
-
-        results = model(temp_file_path, conf=confidence)[0]
-        st.write(results)
 
 # -------------------- WEBCAM --------------------
 with cam_tab:
@@ -204,6 +203,24 @@ with web_rtc:
         video_processor_factory=YOLOTransformer,
         media_stream_constraints={"video": True, "audio": False},
     )
+
+with savedVideo:
+    uploaded_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv"], key = "video upload")
+    if uploaded_file:
+        # Save uploaded video temporarily
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+        temp_file.write(uploaded_file.read())
+        temp_file_path = temp_file.name
+
+        save_dir = tempfile.mkdtemp()
+
+        results = model(temp_file_path, conf=confidence, save=True, project=save_dir, name="detect")
+
+         # YOLO saves output inside save_dir/detect/
+        output_path = os.path.join(save_dir, "detect", os.path.basename(temp_file_path))
+
+        # Display the annotated video
+        st.video(output_path)
 
 # --- Main thread: handle audio playback ---
 if st.session_state.detected_class:
