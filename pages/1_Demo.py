@@ -212,12 +212,12 @@ with savedVideo:
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
 
-        save_dir = tempfile.mkdtemp()
+        temp_output_path = os.path.join(tempfile.gettempdir(), "output.mp4")
 
-        results = model(temp_file_path, conf=confidence, save=True, project=save_dir, name="detect")
+        results = model(temp_file_path, conf=confidence, save=True, project=tempfile.gettempdir(), name="detect")
 
          # YOLO saves output inside save_dir/detect/
-        output_path = os.path.join(save_dir, "detect", os.path.basename(temp_file_path))
+        output_path = os.path.join(tempfile.gettempdir(), "detect", os.path.basename(temp_file_path))
 
         # Display the annotated video
         st.video(output_path)
